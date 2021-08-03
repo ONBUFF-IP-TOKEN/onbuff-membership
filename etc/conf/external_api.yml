@@ -1,0 +1,30 @@
+---
+  routes: 
+    - 
+      group: "onbuff-membership"
+      minversion: "v1.0"
+      maxversion: "v1.1"
+      list: 
+        - 
+          handler: "GetHealthCheck"
+          method: "get"
+          uri: "/healthcheck/_check"
+          precheck: false
+        - 
+          handler: "GetVersion"
+          method: "get"
+          uri: "/:apiver/version"
+          precheck: false
+        - 
+          handler: "PostLogin"
+          method: "post"
+          uri: "/:apiver/auth/login"
+          precheck: false
+        -
+          handler: "PostRegister"
+          method: "post"
+          uri: "/:apiver/auth/register"
+          precheck: false
+
+
+

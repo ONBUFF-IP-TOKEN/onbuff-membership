@@ -1,0 +1,8 @@
+bin/
+
+/etc/conf/config.local.yml
+/etc/conf/config.dev.yml
+etc/swagger/ext/key.pem
+etc/swagger/ext/onbuffcerti.crt.pem
+etc/onbuffcerti.crt
+etc/onbuffcerti.key
