@@ -90,3 +90,25 @@ type LoginResponse struct {
 }
 
 /////////////////////////
+
+// verify auth token
+type VerifyAuthToken struct {
+	WalletAddr string `json:"wallet_address" validate:"required"`
+	AuthToken  string `json:"auth_token" validate:"required"`
+}
+
+func NewVerifyAuthToken() *VerifyAuthToken {
+	return new(VerifyAuthToken)
+}
+
+func (o *VerifyAuthToken) CheckValidate() *base.BaseResponse {
+	if len(o.WalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
+	}
+	if len(o.AuthToken) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auth_RequireAuthToken)
+	}
+	return nil
+}
+
+/////////////////////////

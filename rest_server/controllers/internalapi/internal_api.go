@@ -65,3 +65,7 @@ func (o *InternalAPI) GetHealthCheck(c echo.Context) error {
 func (o *InternalAPI) GetVersion(c echo.Context) error {
 	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
 }
+
+func (o *InternalAPI) VerifyAuthToken(c echo.Context) error {
+	return commonapi.VerifyAuthToken(c)
+}

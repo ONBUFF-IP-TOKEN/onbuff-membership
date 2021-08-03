@@ -2,6 +2,7 @@ package commonapi
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -26,7 +27,7 @@ func PostLogin(c echo.Context) error {
 
 	resp := new(base.BaseResponse)
 	// 1. verify sign check
-	if !token.GetToken().VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
+	if !token.VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
 		resp.SetReturn(resultcode.Result_Auth_InvalidLoginInfo)
 		return c.JSON(http.StatusOK, resp)
@@ -92,7 +93,7 @@ func PostRegister(c echo.Context) error {
 
 	resp := new(base.BaseResponse)
 	// 1. verify sign check
-	if !token.GetToken().VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
+	if !token.VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
 		resp.SetReturn(resultcode.Result_Auth_InvalidLoginInfo)
 		return c.JSON(http.StatusOK, resp)
@@ -114,5 +115,50 @@ func PostRegister(c echo.Context) error {
 	}
 
 	resp.Success()
+	return c.JSON(http.StatusOK, resp)
+}
+
+func VerifyAuthToken(c echo.Context) error {
+	params := context.NewVerifyAuthToken()
+	if err := c.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	resp := new(base.BaseResponse)
+	// 1. verify sign check
+	walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(params.AuthToken)
+	if !isValid {
+		// auth token 오류 리턴
+		log.Error("VerifyAuthToken invalid jwt : ", params.AuthToken, " walletaddr:", params.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_InvalidJwt)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	// 2. 주소 일치 확인
+	if !strings.EqualFold(*walletAddr, params.WalletAddr) {
+		log.Error("VerifyAuthToken not equal walletaddr :", walletAddr, " : ", params.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_InvalidJwt)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	// 3. 가입정보 존재 확인
+	member, err := model.GetDB().GetExistMember(params.WalletAddr)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+	if len(member.Email) == 0 && len(member.WalletAddr) == 0 {
+		log.Error("VerifyAuthToken not member : ", params.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_NotMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	resp.Success()
+	resp.Value = member
 	return c.JSON(http.StatusOK, resp)
 }

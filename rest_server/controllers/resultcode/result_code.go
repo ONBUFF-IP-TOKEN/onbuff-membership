@@ -46,6 +46,7 @@ const (
 	Result_Auth_NotMember         = 20006
 	Result_Auth_RequireEmailInfo  = 20007
 	Result_Auth_ExistMember       = 20008
+	Result_Auth_RequireAuthToken  = 20009
 )
 
 var ResultCodeText = map[int]string{
@@ -94,4 +95,5 @@ var ResultCodeText = map[int]string{
 	Result_Auth_NotMember:         "Not member",
 	Result_Auth_RequireEmailInfo:  "Required email",
 	Result_Auth_ExistMember:       "Exist member",
+	Result_Auth_RequireAuthToken:  "Required auth token",
 }

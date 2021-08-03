@@ -15,3 +15,8 @@
           method: "get"
           uri: "/:apiver/version"
           precheck: false
+        -
+          handler: "VerifyAuthToken"
+          method: "post"
+          uri: "/:apiver/auth/verify"
+          precheck: false

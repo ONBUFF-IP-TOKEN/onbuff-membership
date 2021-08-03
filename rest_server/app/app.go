@@ -15,7 +15,6 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/controllers/internalapi"
 	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/model"
-	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/token"
 )
 
 type ServerApp struct {
@@ -23,8 +22,7 @@ type ServerApp struct {
 	conf       *config.ServerConfig
 	configFile string
 
-	token *token.IToken
-	auth  *auth.IAuth
+	auth *auth.IAuth
 }
 
 func (o *ServerApp) Init(configFile string) (err error) {
@@ -35,9 +33,7 @@ func (o *ServerApp) Init(configFile string) (err error) {
 	if err := o.NewDB(o.conf); err != nil {
 		return err
 	}
-	// if err := o.InitToken(); err != nil {
-	// 	return err
-	// }
+
 	if auth, err := auth.NewIAuth(&o.conf.Auth); err != nil {
 		return err
 	} else {
@@ -84,14 +80,5 @@ func (o *ServerApp) NewDB(conf *config.ServerConfig) error {
 	gCache := basedb.GetCache(&conf.Cache)
 	model.SetDB(mysqlDB, gCache)
 
-	return nil
-}
-
-func (o *ServerApp) InitToken() error {
-	o.token = token.NewTokenManager(&o.conf.Token)
-
-	if err := o.token.Init(); err != nil {
-		return err
-	}
 	return nil
 }

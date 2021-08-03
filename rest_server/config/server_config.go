@@ -14,14 +14,6 @@ type IpblockServer struct {
 	APIDocs         bool   `json:"api_docs" yaml:"api_docs"`
 }
 
-type TokenInfo struct {
-	MainnetHost      string   `yaml:"mainnet_host"`
-	ServerWalletAddr string   `yaml:"server_wallet_address"`
-	ServerPrivateKey string   `yaml:"server_private_key"`
-	TokenAddrs       []string `yaml:"token_address"`
-	NftUriDomain     string   `yaml:"nft_uri_domain"`
-}
-
 type ApiAuth struct {
 	AuthEnable        bool   `yaml:"auth_enable"`
 	JwtSecretKey      string `yaml:"jwt_secret_key"`
@@ -35,7 +27,6 @@ type ServerConfig struct {
 
 	IPServer    IpblockServer   `yaml:"ipblock_server"`
 	MysqlDBAuth baseconf.DBAuth `yaml:"mysql_db_auth"`
-	Token       TokenInfo       `yaml:"token_info"`
 	Auth        ApiAuth         `yaml:"api_auth"`
 }
 
