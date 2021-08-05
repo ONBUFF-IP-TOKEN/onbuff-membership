@@ -16,7 +16,12 @@
           uri: "/:apiver/version"
           precheck: false
         -
-          handler: "VerifyAuthToken"
+          handler: "PostVerifyAuthToken"
           method: "post"
           uri: "/:apiver/auth/verify"
+          precheck: false
+        - 
+          handler: "PutMemberUpdate"
+          method: "put"
+          uri: "/:apiver/auth/member/update"
           precheck: false

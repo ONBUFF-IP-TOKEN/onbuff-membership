@@ -21,9 +21,9 @@
           uri: "/:apiver/auth/login"
           precheck: false
         -
-          handler: "PostRegister"
+          handler: "PostMemberRegister"
           method: "post"
-          uri: "/:apiver/auth/register"
+          uri: "/:apiver/auth/member/register"
           precheck: false
 
 

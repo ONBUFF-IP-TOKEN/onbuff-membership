@@ -101,6 +101,6 @@ func (o *ExternalAPI) PostLogin(c echo.Context) error {
 	return commonapi.PostLogin(c)
 }
 
-func (o *ExternalAPI) PostRegister(c echo.Context) error {
-	return commonapi.PostRegister(c)
+func (o *ExternalAPI) PostMemberRegister(c echo.Context) error {
+	return commonapi.PostMemberRegister(c)
 }

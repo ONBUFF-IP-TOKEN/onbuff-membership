@@ -5,13 +5,22 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/controllers/resultcode"
 )
 
+const (
+	Member_Activate_State_Normal   = 0
+	Member_Activate_State_Blocked  = 1
+	Member_Activate_State_Withdraw = 2
+)
+
 // member
 type Member struct {
-	Id         int64  `json:"id" validate:"required"`
-	WalletAddr string `json:"wallet_address" validate:"required"`
-	Email      string `json:"email" validate:"required"`
-	WalletType string `json:"wallet_type" validate:"required"`
-	CreateTs   int64  `json:"create_ts" validate:"required"`
+	Id            int64  `json:"id" validate:"required"`
+	WalletAddr    string `json:"wallet_address" validate:"required"`
+	Email         string `json:"email" validate:"required"`
+	WalletType    string `json:"wallet_type" validate:"required"`
+	CreateTs      int64  `json:"create_ts" validate:"required"`
+	NickName      string `json:"nickname" validate:"required"`
+	ProfileImg    string `json:"profile_img" validate:"required"`
+	ActivateState int64  `json:"activate_state" validate:"required"`
 }
 
 func NewMember() *Member {
@@ -22,9 +31,12 @@ func NewMember() *Member {
 
 // register
 type RegisterMember struct {
-	WalletType string    `json:"wallet_type" validate:"required"`
-	WalletAuth LoginAuth `json:"wallet_auth" validate:"required"`
-	Email      string    `json:"email" validate:"required"`
+	WalletType    string    `json:"wallet_type" validate:"required"`
+	WalletAuth    LoginAuth `json:"wallet_auth" validate:"required"`
+	Email         string    `json:"email" validate:"required"`
+	NickName      string    `json:"nickname" validate:"required"`
+	ProfileImg    string    `json:"profile_img" validate:"required"`
+	ActivateState int64     `json:"activate_state" validate:"required"`
 }
 
 func NewRegisterMember() *RegisterMember {
@@ -46,6 +58,9 @@ func (o *RegisterMember) CheckValidate() *base.BaseResponse {
 	}
 	if len(o.Email) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auth_RequireEmailInfo)
+	}
+	if len(o.NickName) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auth_RequireNickName)
 	}
 	return nil
 }

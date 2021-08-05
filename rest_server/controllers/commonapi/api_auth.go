@@ -40,7 +40,18 @@ func PostLogin(c echo.Context) error {
 		return c.JSON(http.StatusOK, resp)
 	}
 	if len(member.Email) == 0 && len(member.WalletAddr) == 0 {
+		log.Error("PostLogin not member : ", member.WalletAddr)
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+	if member.ActivateState == context.Member_Activate_State_Blocked {
+		log.Error("PostLogin blocked member : ", member.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_BlockedMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+	if member.ActivateState == context.Member_Activate_State_Withdraw {
+		log.Error("PostLogin withdraw member : ", member.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_Withdraw)
 		return c.JSON(http.StatusOK, resp)
 	}
 
@@ -80,7 +91,7 @@ func PostLogin(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func PostRegister(c echo.Context) error {
+func PostMemberRegister(c echo.Context) error {
 	params := context.NewRegisterMember()
 	if err := c.Bind(params); err != nil {
 		log.Error(err)
@@ -108,6 +119,8 @@ func PostRegister(c echo.Context) error {
 		resp.SetReturn(resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
+	// 계정 활성화
+	params.ActivateState = context.Member_Activate_State_Normal
 
 	if _, err := model.GetDB().InsertMember(params); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
@@ -118,7 +131,7 @@ func PostRegister(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func VerifyAuthToken(c echo.Context) error {
+func PostVerifyAuthToken(c echo.Context) error {
 	params := context.NewVerifyAuthToken()
 	if err := c.Bind(params); err != nil {
 		log.Error(err)
@@ -157,8 +170,47 @@ func VerifyAuthToken(c echo.Context) error {
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
 		return c.JSON(http.StatusOK, resp)
 	}
+	if member.ActivateState == context.Member_Activate_State_Blocked {
+		log.Error("VerifyAuthToken blocked member : ", params.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_BlockedMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+	if member.ActivateState == context.Member_Activate_State_Withdraw {
+		log.Error("VerifyAuthToken withdraw member : ", params.WalletAddr)
+		resp.SetReturn(resultcode.Result_Auth_Withdraw)
+		return c.JSON(http.StatusOK, resp)
+	}
 
 	resp.Success()
 	resp.Value = member
+	return c.JSON(http.StatusOK, resp)
+}
+
+func PutMemberUpdate(c echo.Context) error {
+	params := context.NewMember()
+	if err := c.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	resp := new(base.BaseResponse)
+	//1. 가입정보 존재 확인
+	member, err := model.GetDB().GetExistMember(params.WalletAddr)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	if len(member.Email) == 0 || len(member.WalletAddr) == 0 {
+		resp.SetReturn(resultcode.Result_Auth_NotMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	if _, err := model.GetDB().UpdateMember(params); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	resp.Success()
 	return c.JSON(http.StatusOK, resp)
 }
