@@ -102,6 +102,10 @@ func (o *LoginParam) CheckValidate() *base.BaseResponse {
 type LoginResponse struct {
 	AuthToken  string `json:"auth_token" validate:"required"`
 	ExpireDate int64  `json:"expire_date" validate:"required"`
+
+	Email      string `json:"email" validate:"required"`
+	NickName   string `json:"nickname" validate:"required"`
+	ProfileImg string `json:"profile_img" validate:"required"`
 }
 
 /////////////////////////

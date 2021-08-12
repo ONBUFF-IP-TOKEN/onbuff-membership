@@ -62,6 +62,10 @@ func PostLogin(c echo.Context) error {
 		resp.Value = context.LoginResponse{
 			AuthToken:  authInfo.AuthToken,
 			ExpireDate: authInfo.ExpireDate,
+
+			Email:      authInfo.Email,
+			NickName:   authInfo.NickName,
+			ProfileImg: authInfo.ProfileImg,
 		}
 	} else {
 		// 3. create auth token
@@ -73,13 +77,20 @@ func PostLogin(c echo.Context) error {
 			resp.Value = context.LoginResponse{
 				AuthToken:  authToken,
 				ExpireDate: expireDate,
-			}
 
+				Email:      member.Email,
+				NickName:   member.NickName,
+				ProfileImg: member.ProfileImg,
+			}
 			// 3. redis save
 			authInfo := model.AuthInfo{
 				AuthToken:  authToken,
 				ExpireDate: expireDate,
 				WalletAuth: params.WalletAuth,
+
+				Email:      member.Email,
+				NickName:   member.NickName,
+				ProfileImg: member.ProfileImg,
 			}
 			err = model.GetDB().SetAuthInfo(&authInfo)
 			if err != nil {
