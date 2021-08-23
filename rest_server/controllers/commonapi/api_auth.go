@@ -130,6 +130,18 @@ func PostMemberRegister(c echo.Context) error {
 		resp.SetReturn(resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
+	//3. email, nickname 중복 확인
+	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	} else {
+		if len(member.WalletAddr) != 0 {
+			log.Error("PostMemberRegister exist member : ", params.Email, "  ", params.NickName)
+			resp.SetReturn(resultcode.Result_Auth_ExistMember)
+			return c.JSON(http.StatusOK, resp)
+		}
+	}
+
 	// 계정 활성화
 	params.ActivateState = context.Member_Activate_State_Normal
 
@@ -216,6 +228,18 @@ func PutMemberUpdate(c echo.Context) error {
 	if len(member.Email) == 0 || len(member.WalletAddr) == 0 {
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
 		return c.JSON(http.StatusOK, resp)
+	}
+
+	//2. email, nickname 중복 확인
+	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	} else {
+		if len(member.WalletAddr) != 0 {
+			log.Error("PutMemberUpdate exist member : ", params.Email, "  ", params.NickName)
+			resp.SetReturn(resultcode.Result_Auth_ExistMember)
+			return c.JSON(http.StatusOK, resp)
+		}
 	}
 
 	if _, err := model.GetDB().UpdateMember(params); err != nil {
