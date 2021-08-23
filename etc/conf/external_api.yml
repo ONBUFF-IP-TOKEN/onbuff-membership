@@ -25,6 +25,11 @@
           method: "post"
           uri: "/:apiver/auth/member/register"
           precheck: false
+        - 
+          handler: "GetMemberDuplicateCheck"
+          method: "get"
+          uri: "/:apiver/auth/member/duplicate"
+          precheck: false
 
 
 

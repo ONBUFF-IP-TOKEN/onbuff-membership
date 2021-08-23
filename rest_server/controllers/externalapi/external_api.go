@@ -104,3 +104,7 @@ func (o *ExternalAPI) PostLogin(c echo.Context) error {
 func (o *ExternalAPI) PostMemberRegister(c echo.Context) error {
 	return commonapi.PostMemberRegister(c)
 }
+
+func (o *ExternalAPI) GetMemberDuplicateCheck(c echo.Context) error {
+	return commonapi.GetMemberDuplicateCheck(c)
+}

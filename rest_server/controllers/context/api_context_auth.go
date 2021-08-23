@@ -131,3 +131,22 @@ func (o *VerifyAuthToken) CheckValidate() *base.BaseResponse {
 }
 
 /////////////////////////
+
+// nickname, email duplicate check
+type MemberDuplicateCheck struct {
+	Email    string `query:"email" validate:"required"`
+	NickName string `query:"nickname" validate:"required"`
+}
+
+func NewMemberDuplicateCheck() *MemberDuplicateCheck {
+	return new(MemberDuplicateCheck)
+}
+
+func (o *MemberDuplicateCheck) CheckValidate() *base.BaseResponse {
+	if len(o.Email) == 0 && len(o.NickName) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auth_RequireEmailorNickName)
+	}
+	return nil
+}
+
+/////////////////////////

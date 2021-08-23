@@ -142,6 +142,7 @@ func PostMemberRegister(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// auth 정보 정상 확인
 func PostVerifyAuthToken(c echo.Context) error {
 	params := context.NewVerifyAuthToken()
 	if err := c.Bind(params); err != nil {
@@ -219,6 +220,34 @@ func PutMemberUpdate(c echo.Context) error {
 
 	if _, err := model.GetDB().UpdateMember(params); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	resp.Success()
+	return c.JSON(http.StatusOK, resp)
+}
+
+func GetMemberDuplicateCheck(c echo.Context) error {
+	params := context.NewMemberDuplicateCheck()
+	if err := c.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	resp := new(base.BaseResponse)
+	// 1. 가입정보 존재 확인
+	member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+	if len(member.WalletAddr) != 0 {
+		log.Error("GetMemberDuplicateCheck exist member : ", params.Email, "  ", params.NickName)
+		resp.SetReturn(resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 

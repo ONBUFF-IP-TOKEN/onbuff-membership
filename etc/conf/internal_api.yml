@@ -25,3 +25,4 @@
           method: "put"
           uri: "/:apiver/auth/member/update"
           precheck: false
+

@@ -67,3 +67,25 @@ func (o *DB) UpdateMember(memberInfo *context.Member) (int64, error) {
 
 	return cnt, nil
 }
+
+func (o *DB) GetExistMemberByNickEmail(nickname, email string) (*context.Member, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM members WHERE email='%v' OR nickname='%v'", email, nickname)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	member := context.NewMember()
+	for rows.Next() {
+		if err := rows.Scan(&member.Id, &member.WalletAddr, &member.Email, &member.WalletType, &member.CreateTs, &member.NickName,
+			&member.ProfileImg, &member.ActivateState); err != nil {
+			log.Error(err)
+		}
+	}
+
+	return member, err
+}
