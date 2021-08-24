@@ -1,6 +1,8 @@
 package context
 
 import (
+	"strings"
+
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/onbuff-membership/rest_server/controllers/resultcode"
 )
@@ -11,16 +13,22 @@ const (
 	Member_Activate_State_Withdraw = 2
 )
 
+type TermsOfService struct {
+	ServiceAgree string `json:"service_agree"`
+	PrivacyAgree string `json:"privacy_agree"`
+}
+
 // member
 type Member struct {
-	Id            int64  `json:"id" validate:"required"`
-	WalletAddr    string `json:"wallet_address" validate:"required"`
-	Email         string `json:"email" validate:"required"`
-	WalletType    string `json:"wallet_type" validate:"required"`
-	CreateTs      int64  `json:"create_ts" validate:"required"`
-	NickName      string `json:"nickname" validate:"required"`
-	ProfileImg    string `json:"profile_img" validate:"required"`
-	ActivateState int64  `json:"activate_state" validate:"required"`
+	Id             int64          `json:"id" validate:"required"`
+	WalletAddr     string         `json:"wallet_address" validate:"required"`
+	Email          string         `json:"email" validate:"required"`
+	WalletType     string         `json:"wallet_type" validate:"required"`
+	CreateTs       int64          `json:"create_ts" validate:"required"`
+	NickName       string         `json:"nickname" validate:"required"`
+	ProfileImg     string         `json:"profile_img" validate:"required"`
+	ActivateState  int64          `json:"activate_state" validate:"required"`
+	TermsOfService TermsOfService `json:"terms_of_service"`
 }
 
 func NewMember() *Member {
@@ -31,12 +39,13 @@ func NewMember() *Member {
 
 // register
 type RegisterMember struct {
-	WalletType    string    `json:"wallet_type" validate:"required"`
-	WalletAuth    LoginAuth `json:"wallet_auth" validate:"required"`
-	Email         string    `json:"email" validate:"required"`
-	NickName      string    `json:"nickname" validate:"required"`
-	ProfileImg    string    `json:"profile_img" validate:"required"`
-	ActivateState int64     `json:"activate_state" validate:"required"`
+	WalletType     string         `json:"wallet_type" validate:"required"`
+	WalletAuth     LoginAuth      `json:"wallet_auth" validate:"required"`
+	Email          string         `json:"email" validate:"required"`
+	NickName       string         `json:"nickname" validate:"required"`
+	ProfileImg     string         `json:"profile_img" validate:"required"`
+	ActivateState  int64          `json:"activate_state" validate:"required"`
+	TermsOfService TermsOfService `json:"terms_of_service"`
 }
 
 func NewRegisterMember() *RegisterMember {
@@ -61,6 +70,12 @@ func (o *RegisterMember) CheckValidate() *base.BaseResponse {
 	}
 	if len(o.NickName) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auth_RequireNickName)
+	}
+	if !strings.EqualFold(o.TermsOfService.ServiceAgree, "true") {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireServiceAgree)
+	}
+	if !strings.EqualFold(o.TermsOfService.PrivacyAgree, "true") {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequirePrivacyAgree)
 	}
 	return nil
 }
@@ -103,9 +118,10 @@ type LoginResponse struct {
 	AuthToken  string `json:"auth_token" validate:"required"`
 	ExpireDate int64  `json:"expire_date" validate:"required"`
 
-	Email      string `json:"email" validate:"required"`
-	NickName   string `json:"nickname" validate:"required"`
-	ProfileImg string `json:"profile_img" validate:"required"`
+	Email          string         `json:"email" validate:"required"`
+	NickName       string         `json:"nickname" validate:"required"`
+	ProfileImg     string         `json:"profile_img" validate:"required"`
+	TermsOfService TermsOfService `json:"terms_of_service"`
 }
 
 /////////////////////////

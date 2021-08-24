@@ -26,6 +26,9 @@ const (
 	Result_Auth_BlockedMember          = 20011
 	Result_Auth_Withdraw               = 20012
 	Result_Auth_RequireEmailorNickName = 20013
+
+	Result_Auc_Bid_RequireServiceAgree = 15211 // 서비스이용 약관 동의가 필요하다.
+	Result_Auc_Bid_RequirePrivacyAgree = 15212 // 개인정보 이용 동의 약관이 필요하다.
 )
 
 var ResultCodeText = map[int]string{
@@ -54,4 +57,7 @@ var ResultCodeText = map[int]string{
 	Result_Auth_BlockedMember:          "Blocked Member",
 	Result_Auth_Withdraw:               "Withdraw member",
 	Result_Auth_RequireEmailorNickName: "Email or nickname is required",
+
+	Result_Auc_Bid_RequireServiceAgree: "Consent for service policy is required",
+	Result_Auc_Bid_RequirePrivacyAgree: "Consent to the privacy policy is required",
 }

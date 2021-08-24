@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/datetime"
@@ -19,11 +21,17 @@ func (o *DB) GetExistMember(walletAddr string) (*context.Member, error) {
 
 	defer rows.Close()
 
+	var tos sql.NullString
+
 	member := context.NewMember()
 	for rows.Next() {
 		if err := rows.Scan(&member.Id, &member.WalletAddr, &member.Email, &member.WalletType, &member.CreateTs, &member.NickName,
-			&member.ProfileImg, &member.ActivateState); err != nil {
+			&member.ProfileImg, &member.ActivateState, &tos); err != nil {
 			log.Error(err)
+		} else {
+			getTos := context.TermsOfService{}
+			json.Unmarshal([]byte(tos.String), &getTos)
+			member.TermsOfService = getTos
 		}
 	}
 
@@ -31,11 +39,13 @@ func (o *DB) GetExistMember(walletAddr string) (*context.Member, error) {
 }
 
 func (o *DB) InsertMember(memberInfo *context.RegisterMember) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO members(wallet_address, email, wallet_type, create_ts, nickname, profile_img, activate_state) " +
-		"VALUES (?,?,?,?,?,?,?)")
+	sqlQuery := fmt.Sprintf("INSERT INTO members(wallet_address, email, wallet_type, create_ts, nickname, profile_img, activate_state,terms_of_service ) " +
+		"VALUES (?,?,?,?,?,?,?,?)")
+
+	tos, _ := json.Marshal(memberInfo.TermsOfService)
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, memberInfo.WalletAuth.WalletAddr, memberInfo.Email, memberInfo.WalletType,
-		datetime.GetTS2MilliSec(), memberInfo.NickName, memberInfo.ProfileImg, memberInfo.ActivateState)
+		datetime.GetTS2MilliSec(), memberInfo.NickName, memberInfo.ProfileImg, memberInfo.ActivateState, tos)
 	if err != nil {
 		log.Error(err)
 		return -1, err
@@ -51,6 +61,7 @@ func (o *DB) InsertMember(memberInfo *context.RegisterMember) (int64, error) {
 }
 
 func (o *DB) UpdateMember(memberInfo *context.Member) (int64, error) {
+	// When updating, the terms and conditions are not processed.
 	sqlQuery := "UPDATE members set wallet_address=?,email=?,wallet_type=?,nickname=?,profile_img=?,activate_state=? WHERE id=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, memberInfo.WalletAddr, memberInfo.Email, memberInfo.WalletType, memberInfo.NickName,
@@ -79,11 +90,16 @@ func (o *DB) GetExistMemberByNickEmail(nickname, email string) (*context.Member,
 
 	defer rows.Close()
 
+	var tos sql.NullString
 	member := context.NewMember()
 	for rows.Next() {
 		if err := rows.Scan(&member.Id, &member.WalletAddr, &member.Email, &member.WalletType, &member.CreateTs, &member.NickName,
-			&member.ProfileImg, &member.ActivateState); err != nil {
+			&member.ProfileImg, &member.ActivateState, &tos); err != nil {
 			log.Error(err)
+		} else {
+			getTos := context.TermsOfService{}
+			json.Unmarshal([]byte(tos.String), &getTos)
+			member.TermsOfService = getTos
 		}
 	}
 
