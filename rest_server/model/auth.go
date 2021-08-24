@@ -26,6 +26,13 @@ func (o *DB) GetAuthInfo(walletAddr string) (*AuthInfo, error) {
 	return authInfo, err
 }
 
+// 로그인 정보 삭제
+func (o *DB) DeleteAuthInfo(walletAddr string) error {
+	cKey := genCacheKeyByAuth(walletAddr)
+	err := o.Cache.Del(cKey)
+	return err
+}
+
 func genCacheKeyByAuth(id string) string {
 	return config.GetInstance().DBPrefix + ":AUTH:" + id
 }

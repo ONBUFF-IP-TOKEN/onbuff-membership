@@ -238,7 +238,7 @@ func PutMemberUpdate(c echo.Context) error {
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	} else {
-		if len(member.WalletAddr) != 0 {
+		if !strings.EqualFold(member.WalletAddr, params.WalletAddr) {
 			log.Error("PutMemberUpdate exist member : ", params.Email, "  ", params.NickName)
 			resp.SetReturn(resultcode.Result_Auth_ExistMember)
 			return c.JSON(http.StatusOK, resp)
@@ -249,6 +249,8 @@ func PutMemberUpdate(c echo.Context) error {
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
+
+	model.GetDB().DeleteAuthInfo(params.WalletAddr)
 
 	resp.Success()
 	return c.JSON(http.StatusOK, resp)
