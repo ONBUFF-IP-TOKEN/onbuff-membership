@@ -166,3 +166,21 @@ func (o *MemberDuplicateCheck) CheckValidate() *base.BaseResponse {
 }
 
 /////////////////////////
+
+//withdraw memeber
+type MemberWithdraw struct {
+	WalletAddr string `query:"wallet_address" validate:"required"`
+}
+
+func NewMemberWithdraw() *MemberWithdraw {
+	return new(MemberWithdraw)
+}
+
+func (o *MemberWithdraw) CheckValidate() *base.BaseResponse {
+	if len(o.WalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
+	}
+	return nil
+}
+
+/////////////////////////

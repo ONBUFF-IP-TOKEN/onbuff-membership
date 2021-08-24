@@ -283,3 +283,41 @@ func GetMemberDuplicateCheck(c echo.Context) error {
 	resp.Success()
 	return c.JSON(http.StatusOK, resp)
 }
+
+func DeleteMemberWithdraw(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+	params := context.NewMemberWithdraw()
+
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	resp := new(base.BaseResponse)
+	//1. 가입정보 존재 확인
+	member, err := model.GetDB().GetExistMember(params.WalletAddr)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	if len(member.Email) == 0 || len(member.WalletAddr) == 0 {
+		resp.SetReturn(resultcode.Result_Auth_NotMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	//2. 가입정보 탈퇴로 업데이트
+	member.ActivateState = context.Member_Activate_State_Withdraw
+
+	if _, err := model.GetDB().UpdateMember(member); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	resp.Success()
+	return c.JSON(http.StatusOK, resp)
+}

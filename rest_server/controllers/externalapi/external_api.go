@@ -30,7 +30,6 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 	}
 
 	// auth token 검증
-
 	if conf.Auth.AuthEnable {
 		author, ok := c.Request().Header["Authorization"]
 		if !ok {
@@ -107,4 +106,8 @@ func (o *ExternalAPI) PostMemberRegister(c echo.Context) error {
 
 func (o *ExternalAPI) GetMemberDuplicateCheck(c echo.Context) error {
 	return commonapi.GetMemberDuplicateCheck(c)
+}
+
+func (o *ExternalAPI) DeleteMemberWithdraw(c echo.Context) error {
+	return commonapi.DeleteMemberWithdraw(c)
 }

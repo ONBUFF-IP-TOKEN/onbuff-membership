@@ -105,3 +105,22 @@ func (o *DB) GetExistMemberByNickEmail(nickname, email string) (*context.Member,
 
 	return member, err
 }
+
+func (o *DB) UpdateMemberWithdraw(memberInfo *context.Member) (int64, error) {
+	// When updating, the terms and conditions are not processed.
+	sqlQuery := "UPDATE members set wallet_address=?,email=?,wallet_type=?,nickname=?,profile_img=?,activate_state=? WHERE id=?"
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, memberInfo.WalletAddr, memberInfo.Email, memberInfo.WalletType, memberInfo.NickName,
+		memberInfo.ProfileImg, memberInfo.ActivateState, memberInfo.Id)
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+	cnt, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+
+	return cnt, nil
+}

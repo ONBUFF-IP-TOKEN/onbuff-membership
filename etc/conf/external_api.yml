@@ -30,6 +30,11 @@
           method: "get"
           uri: "/:apiver/auth/member/duplicate"
           precheck: false
+        -
+          handler: "DeleteMemberWithdraw"
+          method: "delete"
+          uri: "/:apiver/auth/member/withdraw"
+          precheck: true
 
 
 
