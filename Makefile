@@ -10,7 +10,7 @@ server_ext_api=external_api.yml
 
 # set variables for build
 output=bin
-app=onbuff-membership
+app=onbuff-membership-$(env)
 src=cmd/$(app)
 
 ifeq ("$(env)", "")
