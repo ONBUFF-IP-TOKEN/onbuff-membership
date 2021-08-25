@@ -30,3 +30,8 @@
           method: "delete"
           uri: "/:apiver/auth/member/remove"
           precheck: true
+        - 
+          handler: "GetMemberList"
+          method: "get"
+          uri: "/:apiver/auth/member/list"
+          precheck: true

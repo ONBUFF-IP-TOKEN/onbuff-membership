@@ -202,3 +202,29 @@ func (o *MemberRemove) CheckValidate() *base.BaseResponse {
 }
 
 /////////////////////////
+
+//get memeber list
+type MemberList struct {
+	PageInfo
+}
+
+func NewMemberList() *MemberList {
+	return new(MemberList)
+}
+
+func (o *MemberList) CheckValidate() *base.BaseResponse {
+	if o.PageOffset < 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
+	}
+	if o.PageSize <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
+	}
+	return nil
+}
+
+type ResponseMemberList struct {
+	PageInfo PageInfoResponse `json:"page_info"`
+	Members  []Member         `json:"members"`
+}
+
+/////////////////////////

@@ -139,3 +139,47 @@ func (o *DB) DeleteMember(memberInfo *context.Member) error {
 
 	return nil
 }
+
+func (o *DB) GetMemberList(memberList *context.MemberList) (*[]context.Member, int64, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM members ORDER BY id DESC LIMIT %v,%v", memberList.PageSize*memberList.PageOffset, memberList.PageSize)
+
+	rows, err := o.Mysql.Query(sqlQuery)
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+	members := []context.Member{}
+	var tos sql.NullString
+
+	for rows.Next() {
+		member := context.Member{}
+		if err := rows.Scan(&member.Id, &member.WalletAddr, &member.Email, &member.WalletType, &member.CreateTs, &member.NickName,
+			&member.ProfileImg, &member.ActivateState, &tos); err != nil {
+			log.Error(err)
+		} else {
+			getTos := context.TermsOfService{}
+			json.Unmarshal([]byte(tos.String), &getTos)
+			member.TermsOfService = getTos
+
+			members = append(members, member)
+		}
+	}
+
+	total, _ := o.GetTotalMember()
+	return &members, total, nil
+}
+
+func (o *DB) GetTotalMember() (int64, error) {
+	var count int64
+	query := fmt.Sprintf("SELECT COUNT(*) as count FROM members")
+	err := o.Mysql.QueryRow(query, &count)
+
+	if err != nil {
+		log.Error(err)
+		return count, err
+	}
+
+	return count, nil
+}

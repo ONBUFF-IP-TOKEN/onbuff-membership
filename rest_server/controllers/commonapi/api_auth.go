@@ -359,3 +359,39 @@ func DeleteMemberRemove(c echo.Context) error {
 	resp.Success()
 	return c.JSON(http.StatusOK, resp)
 }
+
+func GetMemberList(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewMemberList()
+
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	if members, totalSize, err := model.GetDB().GetMemberList(params); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	} else {
+		pageInfo := context.PageInfoResponse{
+			PageOffset: params.PageOffset,
+			PageSize:   int64(len(*members)),
+			TotalSize:  totalSize,
+		}
+
+		resp.Value = context.ResponseMemberList{
+			PageInfo: pageInfo,
+			Members:  *members,
+		}
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
