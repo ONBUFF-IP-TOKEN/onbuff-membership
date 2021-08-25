@@ -73,3 +73,7 @@ func (o *InternalAPI) PostVerifyAuthToken(c echo.Context) error {
 func (o *InternalAPI) PutMemberUpdate(c echo.Context) error {
 	return commonapi.PutMemberUpdate(c)
 }
+
+func (o *InternalAPI) DeleteMemberRemove(c echo.Context) error {
+	return commonapi.DeleteMemberRemove(c)
+}

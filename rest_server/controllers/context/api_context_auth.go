@@ -184,3 +184,21 @@ func (o *MemberWithdraw) CheckValidate() *base.BaseResponse {
 }
 
 /////////////////////////
+
+//remove memeber
+type MemberRemove struct {
+	WalletAddr string `query:"wallet_address" validate:"required"`
+}
+
+func NewMemberRemove() *MemberRemove {
+	return new(MemberRemove)
+}
+
+func (o *MemberRemove) CheckValidate() *base.BaseResponse {
+	if len(o.WalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
+	}
+	return nil
+}
+
+/////////////////////////

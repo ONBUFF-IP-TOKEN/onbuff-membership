@@ -321,3 +321,41 @@ func DeleteMemberWithdraw(c echo.Context) error {
 	resp.Success()
 	return c.JSON(http.StatusOK, resp)
 }
+
+func DeleteMemberRemove(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+	params := context.NewMemberRemove()
+
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	resp := new(base.BaseResponse)
+	//1. 가입정보 존재 확인
+	member, err := model.GetDB().GetExistMember(params.WalletAddr)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	if len(member.Email) == 0 || len(member.WalletAddr) == 0 {
+		resp.SetReturn(resultcode.Result_Auth_NotMember)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	//2. db 테이블 삭제
+	if err := model.GetDB().DeleteMember(member); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	model.GetDB().DeleteAuthInfo(params.WalletAddr)
+
+	resp.Success()
+	return c.JSON(http.StatusOK, resp)
+}

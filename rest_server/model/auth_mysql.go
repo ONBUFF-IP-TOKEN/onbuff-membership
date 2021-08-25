@@ -124,3 +124,18 @@ func (o *DB) UpdateMemberWithdraw(memberInfo *context.Member) (int64, error) {
 
 	return cnt, nil
 }
+
+func (o *DB) DeleteMember(memberInfo *context.Member) error {
+	sqlQuery := "DELETE FROM members WHERE wallet_address=?"
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, memberInfo.WalletAddr)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if _, err = result.RowsAffected(); err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}

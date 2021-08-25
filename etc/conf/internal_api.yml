@@ -25,4 +25,8 @@
           method: "put"
           uri: "/:apiver/auth/member/update"
           precheck: false
-
+        -
+          handler: "DeleteMemberRemove"
+          method: "delete"
+          uri: "/:apiver/auth/member/remove"
+          precheck: true
