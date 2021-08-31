@@ -103,7 +103,7 @@ func PostLogin(c echo.Context) error {
 			}
 			err = model.GetDB().SetAuthInfo(&authInfo)
 			if err != nil {
-				return base.BaseJSONInternalServerError(c, err)
+				resp.SetReturn(resultcode.Result_RedisError)
 			}
 		}
 	}
