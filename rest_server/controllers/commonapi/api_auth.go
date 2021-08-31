@@ -29,6 +29,10 @@ func PostLogin(c echo.Context) error {
 	// 1. verify sign check
 	if !token.VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
+		log.Error("PostLogin : VerifySing error    walletaddr:", params.WalletAuth.WalletAddr,
+			"  message:", params.WalletAuth.Message,
+			" sign:", params.WalletAuth.Sign, " errorCode:", resultcode.Result_Auth_InvalidLoginInfo)
+
 		resp.SetReturn(resultcode.Result_Auth_InvalidLoginInfo)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -36,21 +40,22 @@ func PostLogin(c echo.Context) error {
 	//1.1 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMember(params.WalletAuth.WalletAddr)
 	if err != nil {
+		log.Error("PostLogin : GetExistMember DB Error 	errorCode:", resultcode.Result_DBError)
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if len(member.Email) == 0 && len(member.WalletAddr) == 0 {
-		log.Error("PostLogin not member : ", member.WalletAddr)
+		log.Error("PostLogin not member : ", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_NotMember)
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if member.ActivateState == context.Member_Activate_State_Blocked {
-		log.Error("PostLogin blocked member : ", member.WalletAddr)
+		log.Error("PostLogin blocked member : ", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_BlockedMember)
 		resp.SetReturn(resultcode.Result_Auth_BlockedMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if member.ActivateState == context.Member_Activate_State_Withdraw {
-		log.Error("PostLogin withdraw member : ", member.WalletAddr)
+		log.Error("PostLogin withdraw member : ", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_Withdraw)
 		resp.SetReturn(resultcode.Result_Auth_Withdraw)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -72,6 +77,7 @@ func PostLogin(c echo.Context) error {
 		// 3. create auth token
 		authToken, expireDate, err := auth.GetIAuth().EncryptJwt(params.WalletAuth.WalletAddr)
 		if err != nil {
+			log.Error("PostLogin EncryptJwt error : ", err, " walletaddr:", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_DontEncryptJwt)
 			resp.SetReturn(resultcode.Result_Auth_DontEncryptJwt)
 		} else {
 			resp.Success()
@@ -120,6 +126,9 @@ func PostMemberRegister(c echo.Context) error {
 	// 1. verify sign check
 	if !token.VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
+		log.Error("PostMemberRegister : VerifySing error    walletaddr:", params.WalletAuth.WalletAddr,
+			"  message:", params.WalletAuth.Message,
+			" sign:", params.WalletAuth.Sign, "	errorCode:", resultcode.Result_Auth_InvalidLoginInfo)
 		resp.SetReturn(resultcode.Result_Auth_InvalidLoginInfo)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -127,10 +136,12 @@ func PostMemberRegister(c echo.Context) error {
 	member, err := model.GetDB().GetExistMember(params.WalletAuth.WalletAddr)
 	if err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
+		log.Error("PostMemberRegister : GetExistMember DB Error 	errorCode:", resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if len(member.Email) != 0 || len(member.WalletAddr) != 0 {
 		resp.SetReturn(resultcode.Result_Auth_ExistMember)
+		log.Error("PostMemberRegister : exist member,  email:", member.Email, " walletaddr:", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 	//3. email, nickname 중복 확인
@@ -139,7 +150,7 @@ func PostMemberRegister(c echo.Context) error {
 		return c.JSON(http.StatusOK, resp)
 	} else {
 		if len(member.WalletAddr) != 0 {
-			log.Error("PostMemberRegister exist member : ", params.Email, "  ", params.NickName)
+			log.Error("PostMemberRegister exist member : ", params.Email, "  ", params.NickName, "	errorCode:", resultcode.Result_Auth_ExistMember)
 			resp.SetReturn(resultcode.Result_Auth_ExistMember)
 			return c.JSON(http.StatusOK, resp)
 		}
@@ -150,6 +161,7 @@ func PostMemberRegister(c echo.Context) error {
 
 	if _, err := model.GetDB().InsertMember(params); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
+		log.Error("PostMemberRegister InsertMember error :", err, "	errorCode:", resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 
@@ -174,14 +186,14 @@ func PostVerifyAuthToken(c echo.Context) error {
 	walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(params.AuthToken)
 	if !isValid {
 		// auth token 오류 리턴
-		log.Error("VerifyAuthToken invalid jwt : ", params.AuthToken, " walletaddr:", params.WalletAddr)
+		log.Error("PostVerifyAuthToken invalid jwt : ", params.AuthToken, " walletaddr:", params.WalletAddr, "	errorCode:", resultcode.Result_Auth_InvalidJwt)
 		resp.SetReturn(resultcode.Result_Auth_InvalidJwt)
 		return c.JSON(http.StatusOK, resp)
 	}
 
 	// 2. 주소 일치 확인
 	if !strings.EqualFold(*walletAddr, params.WalletAddr) {
-		log.Error("VerifyAuthToken not equal walletaddr :", walletAddr, " : ", params.WalletAddr)
+		log.Error("PostVerifyAuthToken not equal walletaddr :", walletAddr, " : ", params.WalletAddr, "		errorCode:", resultcode.Result_Auth_InvalidJwt)
 		resp.SetReturn(resultcode.Result_Auth_InvalidJwt)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -189,21 +201,22 @@ func PostVerifyAuthToken(c echo.Context) error {
 	// 3. 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMember(params.WalletAddr)
 	if err != nil {
+		log.Error("PostVerifyAuthToken : GetExistMember DB Error 	errorCode:", resultcode.Result_DBError)
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if len(member.Email) == 0 && len(member.WalletAddr) == 0 {
-		log.Error("VerifyAuthToken not member : ", params.WalletAddr)
+		log.Error("PostVerifyAuthToken not member : ", params.WalletAddr, "	errorCode:", resultcode.Result_Auth_NotMember)
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if member.ActivateState == context.Member_Activate_State_Blocked {
-		log.Error("VerifyAuthToken blocked member : ", params.WalletAddr)
+		log.Info("PostVerifyAuthToken blocked member : ", params.WalletAddr, "	errorCode:", resultcode.Result_Auth_BlockedMember)
 		resp.SetReturn(resultcode.Result_Auth_BlockedMember)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if member.ActivateState == context.Member_Activate_State_Withdraw {
-		log.Error("VerifyAuthToken withdraw member : ", params.WalletAddr)
+		log.Info("PostVerifyAuthToken withdraw member : ", params.WalletAddr, " errorCode:", resultcode.Result_Auth_Withdraw)
 		resp.SetReturn(resultcode.Result_Auth_Withdraw)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -271,11 +284,12 @@ func GetMemberDuplicateCheck(c echo.Context) error {
 	// 1. 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email)
 	if err != nil {
+		log.Error("GetMemberDuplicateCheck : GetExistMemberByNickEmail DB Error")
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 	if len(member.WalletAddr) != 0 {
-		log.Error("GetMemberDuplicateCheck exist member : ", params.Email, "  ", params.NickName)
+		log.Info("GetMemberDuplicateCheck exist member : ", params.Email, "  ", params.NickName)
 		resp.SetReturn(resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -301,11 +315,13 @@ func DeleteMemberWithdraw(c echo.Context) error {
 	//1. 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMember(params.WalletAddr)
 	if err != nil {
+		log.Error("DeleteMemberWithdraw : GetExistMember DB Error")
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
 
 	if len(member.Email) == 0 || len(member.WalletAddr) == 0 {
+		log.Info("GetMemberDuplicateCheck not exist member : email:", member.Email, "  walletaddr:", member.WalletAddr)
 		resp.SetReturn(resultcode.Result_Auth_NotMember)
 		return c.JSON(http.StatusOK, resp)
 	}
@@ -314,6 +330,7 @@ func DeleteMemberWithdraw(c echo.Context) error {
 	member.ActivateState = context.Member_Activate_State_Withdraw
 
 	if _, err := model.GetDB().UpdateMember(member); err != nil {
+		log.Error("DeleteMemberWithdraw : UpdateMember DB Error")
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	}
