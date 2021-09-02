@@ -108,3 +108,7 @@ func (o *ExternalAPI) GetMemberDuplicateCheck(c echo.Context) error {
 func (o *ExternalAPI) DeleteMemberWithdraw(c echo.Context) error {
 	return commonapi.DeleteMemberWithdraw(c)
 }
+
+func (o *ExternalAPI) DeleteLogOut(c echo.Context) error {
+	return commonapi.DeleteLogOut(c)
+}

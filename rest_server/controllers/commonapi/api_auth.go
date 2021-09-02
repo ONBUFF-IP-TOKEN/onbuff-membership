@@ -111,6 +111,15 @@ func PostLogin(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func DeleteLogOut(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+	model.GetDB().DeleteAuthInfo(ctx.WalletAddr())
+
+	resp := new(base.BaseResponse)
+	resp.Success()
+	return c.JSON(http.StatusOK, resp)
+}
+
 func PostMemberRegister(c echo.Context) error {
 	params := context.NewRegisterMember()
 	if err := c.Bind(params); err != nil {

@@ -35,6 +35,11 @@
           method: "delete"
           uri: "/:apiver/auth/member/withdraw"
           precheck: true
+        - 
+          handler: "DeleteLogOut"
+          method: "delete"
+          uri: "/:apiver/auth/logout"
+          precheck: true
 
 
 
