@@ -144,8 +144,8 @@ func PostMemberRegister(c echo.Context) error {
 		log.Error("PostMemberRegister : exist member,  email:", member.Email, " walletaddr:", member.WalletAddr, "	errorCode:", resultcode.Result_Auth_ExistMember)
 		return c.JSON(http.StatusOK, resp)
 	}
-	//3. email, nickname 중복 확인
-	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email); err != nil {
+	//3. nickname 중복 확인
+	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, ""); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	} else {
@@ -247,7 +247,7 @@ func PutMemberUpdate(c echo.Context) error {
 	}
 
 	//2. email, nickname 중복 확인
-	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email); err != nil {
+	if member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, ""); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 		return c.JSON(http.StatusOK, resp)
 	} else {
@@ -282,7 +282,7 @@ func GetMemberDuplicateCheck(c echo.Context) error {
 
 	resp := new(base.BaseResponse)
 	// 1. 가입정보 존재 확인
-	member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, params.Email)
+	member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, "")
 	if err != nil {
 		log.Error("GetMemberDuplicateCheck : GetExistMemberByNickEmail DB Error")
 		resp.SetReturn(resultcode.Result_DBError)

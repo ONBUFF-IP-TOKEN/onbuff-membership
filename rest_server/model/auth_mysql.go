@@ -80,7 +80,17 @@ func (o *DB) UpdateMember(memberInfo *context.Member) (int64, error) {
 }
 
 func (o *DB) GetExistMemberByNickEmail(nickname, email string) (*context.Member, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM members WHERE email='%v' OR nickname='%v'", email, nickname)
+	sqlQuery := "SELECT * FROM members WHERE "
+	if len(email) > 0 && len(nickname) == 0 {
+		sqlQuery += "email='" + email + "'"
+	} else if len(email) == 0 && len(nickname) > 0 {
+		sqlQuery += "nickname='" + nickname + "'"
+	} else if len(email) > 0 && len(nickname) > 0 {
+		sqlQuery += "email='" + email + "' OR nickname='" + nickname + "'"
+	} else {
+		return context.NewMember(), nil
+	}
+
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
