@@ -27,6 +27,7 @@ const (
 	Result_Auth_BlockedMember          = 20011
 	Result_Auth_Withdraw               = 20012
 	Result_Auth_RequireEmailorNickName = 20013
+	Result_Auth_InvalidNickNameRule    = 20014
 
 	Result_RequireValidPageOffset = 12008
 	Result_RequireValidPageSize   = 12009
@@ -62,6 +63,7 @@ var ResultCodeText = map[int]string{
 	Result_Auth_BlockedMember:          "Blocked Member",
 	Result_Auth_Withdraw:               "Withdraw member",
 	Result_Auth_RequireEmailorNickName: "Email or nickname is required",
+	Result_Auth_InvalidNickNameRule:    "Invalid nickname rule",
 
 	Result_RequireValidPageOffset: "Valid page offset is required",
 	Result_RequireValidPageSize:   "Valid page size is required",

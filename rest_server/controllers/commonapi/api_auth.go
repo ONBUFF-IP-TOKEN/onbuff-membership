@@ -2,6 +2,7 @@ package commonapi
 
 import (
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
@@ -132,6 +133,13 @@ func PostMemberRegister(c echo.Context) error {
 	}
 
 	resp := new(base.BaseResponse)
+
+	// 0. nickname 정책 check
+	if !IsValidNickName(params.NickName) {
+		resp.SetReturn(resultcode.Result_Auth_InvalidNickNameRule)
+		return c.JSON(http.StatusOK, resp)
+	}
+
 	// 1. verify sign check
 	if !token.VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
@@ -243,6 +251,12 @@ func PutMemberUpdate(c echo.Context) error {
 	}
 
 	resp := new(base.BaseResponse)
+	// 0. nickname 정책 check
+	if !IsValidNickName(params.NickName) {
+		resp.SetReturn(resultcode.Result_Auth_InvalidNickNameRule)
+		return c.JSON(http.StatusOK, resp)
+	}
+
 	//1. 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMember(params.WalletAddr)
 	if err != nil {
@@ -290,6 +304,13 @@ func GetMemberDuplicateCheck(c echo.Context) error {
 	}
 
 	resp := new(base.BaseResponse)
+
+	// 0. nickname 정책 check
+	if !IsValidNickName(params.NickName) {
+		resp.SetReturn(resultcode.Result_Auth_InvalidNickNameRule)
+		return c.JSON(http.StatusOK, resp)
+	}
+
 	// 1. 가입정보 존재 확인
 	member, err := model.GetDB().GetExistMemberByNickEmail(params.NickName, "")
 	if err != nil {
@@ -420,4 +441,15 @@ func GetMemberList(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func IsValidNickName(nickname string) bool {
+	if len(nickname) < 4 || len(nickname) > 12 {
+		return false
+	}
+
+	re := regexp.MustCompile(`[\{\}\[\]\/?.,;:|\)*~!^\-_+<>@\#$%&\\\=\(\'\"\n\r1-9]+`)
+	strFind := re.FindString(nickname)
+	return len(strFind) <= 0
+
 }
