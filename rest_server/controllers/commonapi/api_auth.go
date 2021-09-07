@@ -450,7 +450,7 @@ func IsValidNickName(nickname string) bool {
 		return false
 	}
 
-	re := regexp.MustCompile(`[\{\}\[\]\/?.,;:|\)*~!^\-_+<>@\#$%&\\\=\(\'\"\n\r1-9]+`)
+	re := regexp.MustCompile(`[\{\}\[\]\/?.,;:|\)*~!^\-_+<>@\#$%&\\\=\(\'\"\n\r]+`)
 	strFind := re.FindString(nickname)
 	return len(strFind) <= 0
 
