@@ -445,7 +445,7 @@ func GetMemberList(c echo.Context) error {
 }
 
 func IsValidNickName(nickname string) bool {
-	log.Debug(utf8.RuneCountInString(nickname))
+
 	if utf8.RuneCountInString(nickname) < 4 || utf8.RuneCountInString(nickname) > 12 {
 		return false
 	}
