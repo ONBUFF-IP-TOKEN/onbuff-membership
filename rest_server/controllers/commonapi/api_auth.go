@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -444,7 +445,8 @@ func GetMemberList(c echo.Context) error {
 }
 
 func IsValidNickName(nickname string) bool {
-	if len(nickname) < 4 || len(nickname) > 12 {
+	log.Debug(utf8.RuneCountInString(nickname))
+	if utf8.RuneCountInString(nickname) < 4 || utf8.RuneCountInString(nickname) > 12 {
 		return false
 	}
 
